@@ -138,7 +138,7 @@ export default function AdminTournamentsPage() {
 
       {/* Create Modal */}
       <Modal isOpen={createModal} onClose={() => setCreateModal(false)} title="Create Tournament">
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
           <Input label="Title *" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="e.g. Weekend Ludo Championship" />
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-300">Description</label>
@@ -158,7 +158,7 @@ export default function AdminTournamentsPage() {
               onChange={e => setBannerFile(e.target.files[0]||null)} />
             {bannerFile && <p className="text-xs text-emerald-400">Selected: {bannerFile.name}</p>}
           </div>
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-2 pb-1">
             <Button variant="secondary" onClick={() => setCreateModal(false)}>Cancel</Button>
             <Button loading={creating} onClick={handleCreate}>Create</Button>
           </div>

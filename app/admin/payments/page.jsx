@@ -283,7 +283,7 @@ export default function AdminPaymentsPage() {
       <Modal isOpen={!!reviewModal} onClose={() => setReviewModal(null)}
         title={reviewModal?.action === 'approve' ? '✅ Approve Payment' : '❌ Reject Payment'} size="sm">
         {reviewModal && (
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-400">User</span>

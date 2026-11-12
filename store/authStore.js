@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '@/lib/api/axios';
+import api, { setMemoryToken, clearMemoryToken } from '@/lib/api/axios';
 
 const useAuthStore = create(
   persist(
@@ -8,6 +8,7 @@ const useAuthStore = create(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      _token: null, // persisted JWT for cross-origin Bearer fallback
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
 
@@ -15,7 +16,16 @@ const useAuthStore = create(
         set({ isLoading: true });
         try {
           const { data } = await api.post('/auth/login', { email, password });
-          set({ user: data.data.user, isAuthenticated: true, isLoading: false });
+          const token = data.data?.token || null;
+          if (token) {
+            setMemoryToken(token);
+            // Update socket auth dynamically
+            if (typeof window !== 'undefined') {
+              const { updateSocketAuth } = await import('@/lib/socket/socket');
+              updateSocketAuth(token);
+            }
+          }
+          set({ user: data.data.user, isAuthenticated: true, isLoading: false, _token: token });
           return { success: true, user: data.data.user };
         } catch (err) {
           set({ isLoading: false });
@@ -27,7 +37,15 @@ const useAuthStore = create(
         set({ isLoading: true });
         try {
           const { data } = await api.post('/auth/register', { username, email, password });
-          set({ user: data.data.user, isAuthenticated: true, isLoading: false });
+          const token = data.data?.token || null;
+          if (token) {
+            setMemoryToken(token);
+            if (typeof window !== 'undefined') {
+              const { updateSocketAuth } = await import('@/lib/socket/socket');
+              updateSocketAuth(token);
+            }
+          }
+          set({ user: data.data.user, isAuthenticated: true, isLoading: false, _token: token });
           return { success: true, user: data.data.user };
         } catch (err) {
           set({ isLoading: false });
@@ -39,15 +57,24 @@ const useAuthStore = create(
         try {
           await api.post('/auth/logout');
         } catch {}
-        set({ user: null, isAuthenticated: false });
+        clearMemoryToken();
+        if (typeof window !== 'undefined') {
+          const { disconnectSocket } = await import('@/lib/socket/socket');
+          disconnectSocket();
+        }
+        set({ user: null, isAuthenticated: false, _token: null });
       },
 
       refreshUser: async () => {
+        // On page load, rehydrate the memory token from persisted store
+        const { _token } = get();
+        if (_token) setMemoryToken(_token);
         try {
           const { data } = await api.get('/auth/me');
           set({ user: data.data.user, isAuthenticated: true });
         } catch {
-          set({ user: null, isAuthenticated: false });
+          clearMemoryToken();
+          set({ user: null, isAuthenticated: false, _token: null });
         }
       },
 
@@ -58,7 +85,11 @@ const useAuthStore = create(
     }),
     {
       name: 'ludo-auth',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        _token: state._token,
+      }),
     }
   )
 );

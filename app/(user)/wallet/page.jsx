@@ -262,7 +262,7 @@ export default function WalletPage() {
 
       {/* Request Coins Modal */}
       <Modal isOpen={requestModal} onClose={() => setRequestModal(false)} title="Request Free Demo Coins">
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300">
             These are free demo coins only. No real money is involved.
             Minimum request: 200 coins. Admin approval required.

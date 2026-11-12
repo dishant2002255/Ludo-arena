@@ -380,7 +380,7 @@ export default function TournamentDetailPage() {
 
       {/* Submit Result Modal */}
       <Modal isOpen={submitModal} onClose={() => setSubmitModal(false)} title="Submit Result Screenshot" size="sm">
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300">
             Upload your screenshot as proof. Admin will verify the result. Supported: JPG, PNG, WebP (max 8 MB).
           </div>

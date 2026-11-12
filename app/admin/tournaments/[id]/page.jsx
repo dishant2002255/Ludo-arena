@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -32,7 +32,7 @@ export default function AdminTournamentDetailPage() {
   // Modals
   const [editModal, setEditModal]       = useState(false);
   const [roomModal, setRoomModal]       = useState(false);
-  const [verifyModal, setVerifyModal]   = useState(null); // { submission }
+  const [verifyModal, setVerifyModal]   = useState(null);
   const [finalModal, setFinalModal]     = useState(false);
   const [cancelModal, setCancelModal]   = useState(false);
   const [regModal, setRegModal]         = useState(false);
@@ -130,7 +130,6 @@ export default function AdminTournamentDetailPage() {
   if (!tournament) return <div className="text-slate-400 p-8 text-center">Not found</div>;
 
   const t = tournament;
-  const isFull        = t.participants?.length >= t.requiredPlayers;
   const isActive      = !['completed','cancelled'].includes(t.status);
   const canPublishRoom = t.status === 'waiting_for_admin';
   const canFinalize   = t.status === 'result_pending';
@@ -176,14 +175,12 @@ export default function AdminTournamentDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Info + Participants */}
         <div className="space-y-5">
-          {/* Banner */}
           {t.bannerUrl && (
             <div className="game-card overflow-hidden h-40">
               <img src={t.bannerUrl} alt={t.title} className="w-full h-full object-cover" />
             </div>
           )}
 
-          {/* Stats */}
           <div className="game-card p-5 grid grid-cols-2 gap-4">
             {[
               ['Status', t.status?.replace(/_/g,' ')],
@@ -198,7 +195,6 @@ export default function AdminTournamentDetailPage() {
             ))}
           </div>
 
-          {/* Participants */}
           <div className="game-card p-5">
             <h2 className="section-title mb-4">Participants ({t.participants?.length||0}/{t.requiredPlayers})</h2>
             {(t.participants?.length||0) === 0 ? (
@@ -221,7 +217,6 @@ export default function AdminTournamentDetailPage() {
             )}
           </div>
 
-          {/* Room Credentials (admin view) */}
           {t.externalRoomId && (
             <div className="game-card p-5 space-y-3">
               <h2 className="section-title">Published Room</h2>
@@ -238,9 +233,6 @@ export default function AdminTournamentDetailPage() {
                       </button>
                     </div>
                   </div>
-                )}
-                {t.roomPublishedAt && (
-                  <div><p className="text-xs text-slate-500">Published</p><p className="text-white text-xs">{format(new Date(t.roomPublishedAt),'dd MMM yy HH:mm')}</p></div>
                 )}
               </div>
               {t.roomInstructions && (
@@ -274,7 +266,6 @@ export default function AdminTournamentDetailPage() {
                       {sub.status?.replace(/_/g,' ')}
                     </span>
                   </div>
-                  {/* Screenshot */}
                   <div>
                     <a href={sub.screenshotUrl} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
@@ -284,7 +275,6 @@ export default function AdminTournamentDetailPage() {
                   </div>
                   {sub.remarks && <p className="text-xs text-slate-400 italic">{sub.remarks}</p>}
                   {sub.adminRemarks && <p className="text-xs text-slate-500 border-t border-white/10 pt-2">Admin note: {sub.adminRemarks}</p>}
-                  {/* Verify button */}
                   {['submitted','verification_pending'].includes(sub.status) && (
                     <Button size="sm" variant="secondary" fullWidth onClick={() => {
                       setVerifyModal({ submission: sub });
@@ -302,7 +292,7 @@ export default function AdminTournamentDetailPage() {
 
       {/* Edit */}
       <Modal isOpen={editModal} onClose={() => setEditModal(false)} title="Edit Tournament">
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
           <Input label="Title" value={editForm.title||''} onChange={e=>setEditForm({...editForm,title:e.target.value})} />
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-300">Description</label>
@@ -317,7 +307,7 @@ export default function AdminTournamentDetailPage() {
             <label className="text-sm font-medium text-slate-300">Replace Banner (optional)</label>
             <input type="file" accept=".jpg,.jpeg,.png,.webp" className="input-field py-2" onChange={e=>setBannerFile(e.target.files[0]||null)} />
           </div>
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pb-1">
             <Button variant="secondary" onClick={() => setEditModal(false)}>Cancel</Button>
             <Button loading={submitting} onClick={handleEdit}>Save Changes</Button>
           </div>
@@ -326,7 +316,7 @@ export default function AdminTournamentDetailPage() {
 
       {/* Toggle registration */}
       <Modal isOpen={regModal} onClose={() => setRegModal(false)} title="Registration" size="sm">
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
           <p className="text-slate-300 text-sm">
             {t.registrationOpen
               ? 'Close registration so no new players can join?'
@@ -344,7 +334,7 @@ export default function AdminTournamentDetailPage() {
 
       {/* Publish room */}
       <Modal isOpen={roomModal} onClose={() => setRoomModal(false)} title={t.externalRoomId ? 'Update Room Details' : 'Publish Room Details'}>
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
           <Input label="Platform" value={roomForm.externalPlatform} onChange={e=>setRoomForm({...roomForm,externalPlatform:e.target.value})} />
           <Input label="Room ID *" value={roomForm.externalRoomId} onChange={e=>setRoomForm({...roomForm,externalRoomId:e.target.value})} placeholder="e.g. 123456" />
           <Input label="Room Password (optional)" value={roomForm.externalRoomPassword} onChange={e=>setRoomForm({...roomForm,externalRoomPassword:e.target.value})} />
@@ -356,7 +346,7 @@ export default function AdminTournamentDetailPage() {
           <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400">
             ⚠ Room credentials will be visible ONLY to the 4 registered participants.
           </div>
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pb-1">
             <Button variant="secondary" onClick={() => setRoomModal(false)}>Cancel</Button>
             <Button loading={submitting} variant="success" onClick={handlePublishRoom}>Publish Room</Button>
           </div>
@@ -366,7 +356,7 @@ export default function AdminTournamentDetailPage() {
       {/* Verify submission */}
       <Modal isOpen={!!verifyModal} onClose={() => setVerifyModal(null)} title="Verify Submission" size="sm">
         {verifyModal && (
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-sm space-y-1">
               <p className="text-white font-medium">{verifyModal.submission.user?.username}</p>
               <p className="text-slate-400 capitalize">Claimed: {verifyModal.submission.claimedResult}</p>
@@ -388,7 +378,7 @@ export default function AdminTournamentDetailPage() {
               <textarea className="input-field resize-none" rows={2} placeholder="Feedback for the user..."
                 value={verifyForm.adminRemarks} onChange={e=>setVerifyForm(f=>({...f,adminRemarks:e.target.value}))} />
             </div>
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pb-1">
               <Button variant="secondary" onClick={() => setVerifyModal(null)}>Cancel</Button>
               <Button loading={submitting} onClick={handleVerify}>Submit Decision</Button>
             </div>
@@ -398,7 +388,7 @@ export default function AdminTournamentDetailPage() {
 
       {/* Finalize */}
       <Modal isOpen={finalModal} onClose={() => setFinalModal(false)} title="Finalize Tournament" size="sm">
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
           <p className="text-slate-300 text-sm">Select the winner and finalize the tournament. This action credits the reward and cannot be undone.</p>
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-300">Winner</label>
@@ -415,7 +405,7 @@ export default function AdminTournamentDetailPage() {
             <textarea className="input-field resize-none" rows={2}
               value={finalForm.verificationRemarks} onChange={e=>setFinalForm(f=>({...f,verificationRemarks:e.target.value}))} />
           </div>
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pb-1">
             <Button variant="secondary" onClick={() => setFinalModal(false)}>Cancel</Button>
             <Button loading={submitting} variant="success" onClick={handleFinalize}>Finalize Tournament</Button>
           </div>
@@ -424,10 +414,10 @@ export default function AdminTournamentDetailPage() {
 
       {/* Cancel */}
       <Modal isOpen={cancelModal} onClose={() => setCancelModal(false)} title="Cancel Tournament" size="sm">
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
           <p className="text-red-400 text-sm">This will cancel the tournament and notify all participants.</p>
           <Input label="Reason (optional)" value={cancelForm.reason} onChange={e=>setCancelForm({reason:e.target.value})} />
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pb-1">
             <Button variant="secondary" onClick={() => setCancelModal(false)}>Back</Button>
             <Button loading={submitting} variant="danger" onClick={handleCancel}>Confirm Cancel</Button>
           </div>

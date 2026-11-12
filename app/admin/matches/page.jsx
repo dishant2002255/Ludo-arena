@@ -124,7 +124,7 @@ export default function AdminMatchesPage() {
 
       {/* Create/Edit Modal */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editMatch ? 'Edit Match' : 'Create Match'}>
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
           <Input label="Match Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Classic Arena" />
           <Input label="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Optional" />
           <div className="grid grid-cols-2 gap-4">
