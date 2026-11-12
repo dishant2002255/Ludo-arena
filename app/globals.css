@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #080d2e;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.4);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.7);
+  }
+}
+
+@layer components {
+  /* Gaming card */
+  .game-card {
+    @apply bg-navy-900/80 border border-white/10 rounded-2xl backdrop-blur-sm;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .game-card-hover {
+    @apply game-card transition-all duration-300 hover:border-purple-500/30 hover:-translate-y-1;
+    &:hover { box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.1); }
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent;
+  }
+
+  .gold-text {
+    @apply bg-gradient-to-r from-yellow-400 to-amber-300 bg-clip-text text-transparent;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200 
+           hover:from-purple-500 hover:to-indigo-500 hover:shadow-glow-purple
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white/10 text-white font-medium px-6 py-3 rounded-xl 
+           border border-white/20 transition-all duration-200
+           hover:bg-white/20 hover:border-white/30
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:from-red-500 hover:to-rose-500
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-success {
+    @apply bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:from-emerald-500 hover:to-green-500
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full bg-navy-900/60 border border-white/15 rounded-xl px-4 py-3
+           text-white placeholder-slate-500 outline-none transition-all duration-200
+           focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-green  { @apply badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/30; }
+  .badge-red    { @apply badge bg-red-500/20 text-red-400 border border-red-500/30; }
+  .badge-yellow { @apply badge bg-yellow-500/20 text-yellow-400 border border-yellow-500/30; }
+  .badge-blue   { @apply badge bg-blue-500/20 text-blue-400 border border-blue-500/30; }
+  .badge-purple { @apply badge bg-purple-500/20 text-purple-400 border border-purple-500/30; }
+  .badge-gray   { @apply badge bg-slate-500/20 text-slate-400 border border-slate-500/30; }
+
+  /* Stat card */
+  .stat-card {
+    @apply game-card p-6 flex flex-col gap-2;
+  }
+
+  /* Section heading */
+  .section-title {
+    @apply text-xl font-semibold text-white font-display tracking-wide;
+  }
+
+  /* Gradient border card */
+  .gradient-border {
+    position: relative;
+    border-radius: 1rem;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(99, 102, 241, 0.4), transparent);
+    z-index: -1;
+  }
+}
+
+/* Ludo-specific */
+.ludo-board-container {
+  aspect-ratio: 1;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Dice animation */
+.dice-rolling {
+  animation: spinDice 0.5s ease-out;
+}
+
+@keyframes spinDice {
+  0%   { transform: rotateX(0) rotateY(0) rotateZ(0); }
+  33%  { transform: rotateX(120deg) rotateY(120deg) rotateZ(0deg); }
+  66%  { transform: rotateX(240deg) rotateY(60deg) rotateZ(180deg); }
+  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+}
+
+/* Token highlight pulse */
+.token-movable {
+  animation: tokenPulse 1s ease-in-out infinite;
+}
+@keyframes tokenPulse {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 4px currentColor); }
+  50%       { filter: brightness(1.4) drop-shadow(0 0 12px currentColor); }
+}
