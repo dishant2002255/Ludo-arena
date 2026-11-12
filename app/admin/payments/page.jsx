@@ -36,23 +36,102 @@ export default function AdminPaymentsPage() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       audioCtxRef.current = ctx;
 
-      const playBeep = () => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.4, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
+      /**
+       * Plays one "ring" burst — sounds like a mobile phone ringing.
+       * Pattern: two-tone melody repeated inside each ring burst.
+       *   Ring (2s) — Silence (1s) — Ring (2s) — Silence (1s) — repeat
+       *
+       * Uses two oscillators for a richer, warmer phone ring sound:
+       * - Main tone with vibrato (frequency modulation)
+       * - Harmony note slightly above
+       */
+      const playRingBurst = (startTime) => {
+        const ringDuration = 2.0;   // seconds ring plays
+        // silence gap handled by the interval scheduling
+
+        // ── Note 1: Main tone ~880Hz (A5) with vibrato ────────────────────
+        const osc1  = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const lfo1  = ctx.createOscillator();   // vibrato LFO
+        const lfoG1 = ctx.createGain();
+
+        lfo1.frequency.value  = 8;              // vibrato speed: 8 Hz
+        lfoG1.gain.value      = 25;             // vibrato depth: ±25 Hz
+        lfo1.connect(lfoG1);
+        lfoG1.connect(osc1.frequency);
+
+        osc1.type             = 'sine';
+        osc1.frequency.value  = 880;
+
+        // Volume envelope: quick attack, sustain, quick release
+        gain1.gain.setValueAtTime(0, startTime);
+        gain1.gain.linearRampToValueAtTime(0.4, startTime + 0.05);
+        gain1.gain.setValueAtTime(0.4, startTime + ringDuration - 0.1);
+        gain1.gain.linearRampToValueAtTime(0, startTime + ringDuration);
+
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+
+        lfo1.start(startTime);
+        osc1.start(startTime);
+        lfo1.stop(startTime + ringDuration);
+        osc1.stop(startTime + ringDuration);
+
+        // ── Note 2: Harmony ~1109Hz (C#6) — adds brightness ──────────────
+        const osc2  = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        const lfo2  = ctx.createOscillator();
+        const lfoG2 = ctx.createGain();
+
+        lfo2.frequency.value  = 8;
+        lfoG2.gain.value      = 20;
+        lfo2.connect(lfoG2);
+        lfoG2.connect(osc2.frequency);
+
+        osc2.type             = 'sine';
+        osc2.frequency.value  = 1109;
+
+        gain2.gain.setValueAtTime(0, startTime);
+        gain2.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+        gain2.gain.setValueAtTime(0.2, startTime + ringDuration - 0.1);
+        gain2.gain.linearRampToValueAtTime(0, startTime + ringDuration);
+
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+
+        lfo2.start(startTime);
+        osc2.start(startTime);
+        lfo2.stop(startTime + ringDuration);
+        osc2.stop(startTime + ringDuration);
+
+        // ── Note 3: Sub bass hit at start for punch ───────────────────────
+        const sub  = ctx.createOscillator();
+        const subG = ctx.createGain();
+        sub.type            = 'sine';
+        sub.frequency.value = 220;
+        subG.gain.setValueAtTime(0.15, startTime);
+        subG.gain.linearRampToValueAtTime(0, startTime + 0.15);
+        sub.connect(subG);
+        subG.connect(ctx.destination);
+        sub.start(startTime);
+        sub.stop(startTime + 0.15);
       };
 
-      // Play immediately then repeat every 3 seconds
-      playBeep();
-      alarmIntervalRef.current = setInterval(playBeep, 3000);
-    } catch {}
+      // Ring every 3 seconds: 2s ring + 1s silence
+      const RING_CYCLE = 3.0;
+
+      // Play first ring immediately
+      playRingBurst(ctx.currentTime);
+
+      // Keep scheduling rings every 3 seconds
+      alarmIntervalRef.current = setInterval(() => {
+        if (ctx.state === 'closed') return;
+        playRingBurst(ctx.currentTime);
+      }, RING_CYCLE * 1000);
+
+    } catch (err) {
+      console.warn('Audio alarm failed:', err);
+    }
   }, [alarmMuted]);
 
   const stopAlarmSound = () => {
