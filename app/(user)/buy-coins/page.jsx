@@ -52,10 +52,14 @@ export default function BuyCoinsPage() {
     setInitiating(true);
     try {
       const { data } = await api.post('/payment/initiate', { coinsRequested: coins, upiPlatform: selectedApp });
-      // Redirect to checkout page with order info
-      const orderId = data.data.order._id;
-      const upiUrl = encodeURIComponent(data.data.appLinks[selectedApp] || data.data.upiUrl);
-      router.push(`/buy-coins/checkout?orderId=${orderId}&app=${selectedApp}&upiUrl=${upiUrl}&coins=${coins}`);
+      const orderId    = data.data.order._id;
+      const orderRef   = data.data.order.orderReference;
+      const upiUrl     = encodeURIComponent(data.data.appLinks[selectedApp] || data.data.upiUrl);
+      const upiIdParam = encodeURIComponent(settings?.upiId || '');
+      const upiName    = encodeURIComponent(settings?.upiName || 'Ludo Arena');
+      router.push(
+        `/buy-coins/checkout?orderId=${orderId}&app=${selectedApp}&upiUrl=${upiUrl}&coins=${coins}&ref=${orderRef}&upiId=${upiIdParam}&upiName=${upiName}`
+      );
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed';
       if (msg.includes('not currently available') || msg.includes('PAYMENT_NOT_ACTIVE')) {

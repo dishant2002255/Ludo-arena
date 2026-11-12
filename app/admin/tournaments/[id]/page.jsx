@@ -335,20 +335,29 @@ export default function AdminTournamentDetailPage() {
       {/* Publish room */}
       <Modal isOpen={roomModal} onClose={() => setRoomModal(false)} title={t.externalRoomId ? 'Update Room Details' : 'Publish Room Details'}>
         <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
+          {/* Admin workflow instructions */}
+          <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-300 space-y-1.5">
+            <p className="font-semibold text-purple-200">📋 Before filling this form:</p>
+            <p>1. Open <strong>Ludo King</strong> app on your phone</p>
+            <p>2. Tap <strong>Play Online → Private Room → Create Room</strong></p>
+            <p>3. Set room to <strong>4 Players</strong>, note the <strong>Room ID</strong> and <strong>Password</strong></p>
+            <p>4. Enter those details below and click Publish</p>
+            <p>5. All 4 players will instantly receive the Room ID</p>
+          </div>
           <Input label="Platform" value={roomForm.externalPlatform} onChange={e=>setRoomForm({...roomForm,externalPlatform:e.target.value})} />
-          <Input label="Room ID *" value={roomForm.externalRoomId} onChange={e=>setRoomForm({...roomForm,externalRoomId:e.target.value})} placeholder="e.g. 123456" />
-          <Input label="Room Password (optional)" value={roomForm.externalRoomPassword} onChange={e=>setRoomForm({...roomForm,externalRoomPassword:e.target.value})} />
+          <Input label="Room ID * (from Ludo King)" value={roomForm.externalRoomId} onChange={e=>setRoomForm({...roomForm,externalRoomId:e.target.value})} placeholder="e.g. 123456" />
+          <Input label="Room Password (if set)" value={roomForm.externalRoomPassword} onChange={e=>setRoomForm({...roomForm,externalRoomPassword:e.target.value})} placeholder="Leave blank if no password" />
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-300">Instructions for players</label>
-            <textarea className="input-field resize-none" rows={3} placeholder="How to find and join the room..."
+            <textarea className="input-field resize-none" rows={2} placeholder="e.g. Open Ludo King → Play Online → Private Room → Join Room"
               value={roomForm.roomInstructions} onChange={e=>setRoomForm({...roomForm,roomInstructions:e.target.value})} />
           </div>
           <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400">
-            ⚠ Room credentials will be visible ONLY to the 4 registered participants.
+            ⚠ Room ID and password are visible ONLY to the 4 registered participants, not to anyone else.
           </div>
           <div className="flex justify-end gap-3 pb-1">
             <Button variant="secondary" onClick={() => setRoomModal(false)}>Cancel</Button>
-            <Button loading={submitting} variant="success" onClick={handlePublishRoom}>Publish Room</Button>
+            <Button loading={submitting} variant="success" onClick={handlePublishRoom}>Publish Room Details</Button>
           </div>
         </div>
       </Modal>

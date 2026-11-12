@@ -261,14 +261,42 @@ export default function TournamentDetailPage() {
         <div className="game-card p-6 space-y-4">
           {/* Waiting for admin */}
           {tournament.status === 'waiting_for_admin' && isParticipant && (
-            <div className="text-center py-6 space-y-3">
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}>
-                <Clock size={40} className="text-yellow-400 mx-auto" />
-              </motion.div>
-              <h3 className="text-white font-semibold">All Players Have Joined!</h3>
-              <p className="text-slate-400 text-sm">
-                Waiting for admin to create and share the Ludo room. You will receive a notification when the room is ready.
-              </p>
+            <div className="space-y-4">
+              <div className="text-center py-4 space-y-3">
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}>
+                  <Clock size={36} className="text-yellow-400 mx-auto" />
+                </motion.div>
+                <h3 className="text-white font-semibold text-lg">All Players Have Joined! 🎉</h3>
+                <p className="text-slate-400 text-sm">
+                  Admin will now create a room on <strong className="text-white">Ludo King</strong> and share the Room ID here.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-3 text-sm">
+                <p className="text-purple-300 font-semibold">What happens next:</p>
+                <div className="space-y-2 text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <span className="text-purple-400 font-bold shrink-0">1.</span>
+                    <span>Admin opens Ludo King app and creates a Private Room</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-purple-400 font-bold shrink-0">2.</span>
+                    <span>Admin enters the Room ID and password in the Admin Panel</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-purple-400 font-bold shrink-0">3.</span>
+                    <span>Room details appear here automatically — you'll get a notification</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-purple-400 font-bold shrink-0">4.</span>
+                    <span>Open Ludo King and join the room using the shared Room ID</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400">
+                ⚠ Keep this page open — room details will appear here automatically when admin publishes them.
+              </div>
             </div>
           )}
 
