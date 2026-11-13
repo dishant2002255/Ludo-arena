@@ -382,6 +382,24 @@ export default function AdminPaymentsPage() {
               </div>
             </div>
 
+            {/* Screenshot proof */}
+            {reviewModal.order.screenshotUrl ? (
+              <div className="space-y-1.5">
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Payment Screenshot</p>
+                <img
+                  src={reviewModal.order.screenshotUrl}
+                  alt="Payment proof"
+                  className="w-full rounded-xl border border-white/10 object-contain max-h-56 bg-black/20 cursor-pointer"
+                  onClick={() => window.open(reviewModal.order.screenshotUrl, '_blank')}
+                />
+                <p className="text-xs text-slate-500 text-center">Tap to open full size</p>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+                ⚠ User has not uploaded a payment screenshot yet.
+              </div>
+            )}
+
             {reviewModal.action === 'approve' && (
               <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
                 ✅ Approve only after confirming the payment has arrived in your bank/UPI account.
@@ -410,7 +428,7 @@ export default function AdminPaymentsPage() {
       {/* Detail Modal */}
       <Modal isOpen={!!detailModal} onClose={() => setDetailModal(null)} title="Payment Details" size="sm">
         {detailModal && (
-          <div className="p-6 space-y-3 text-sm">
+          <div className="p-6 space-y-3 text-sm overflow-y-auto max-h-[80vh]">
             {[
               ['User', detailModal.user?.username],
               ['Email', detailModal.user?.email],
@@ -428,6 +446,29 @@ export default function AdminPaymentsPage() {
                 <span className="text-white text-right capitalize">{v}</span>
               </div>
             ))}
+
+            {/* Payment Screenshot */}
+            {detailModal.screenshotUrl ? (
+              <div className="pt-3 border-t border-white/10 space-y-2">
+                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Payment Screenshot</p>
+                <img
+                  src={detailModal.screenshotUrl}
+                  alt="Payment proof"
+                  className="w-full rounded-xl border border-white/10 object-contain max-h-72 bg-black/20 cursor-pointer"
+                  onClick={() => window.open(detailModal.screenshotUrl, '_blank')}
+                />
+                <p className="text-xs text-slate-500 text-center">Tap to open full size</p>
+                {detailModal.screenshotSubmittedAt && (
+                  <p className="text-xs text-slate-500 text-center">
+                    Submitted: {format(new Date(detailModal.screenshotSubmittedAt), 'dd MMM yyyy HH:mm')}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-white/10">
+                <p className="text-slate-500 text-xs text-center">No payment screenshot uploaded yet</p>
+              </div>
+            )}
           </div>
         )}
       </Modal>

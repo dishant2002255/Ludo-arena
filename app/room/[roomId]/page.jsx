@@ -14,8 +14,12 @@ export default function RoomPage() {
   const { roomId } = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
-  const { room, gameState, myColor, setRoom, setGameState, setMyColor, setDiceResult,
-          addEvent, setGameFinished, gameFinished, reset } = useGameStore();
+  const {
+    room, gameState, myColor,
+    setRoom, setGameState, setMyColor,
+    setDiceResult, addEvent, setGameFinished,
+    gameFinished, reset,
+  } = useGameStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,22 +30,19 @@ export default function RoomPage() {
 
   const initRoom = async () => {
     try {
-      // Load room from API (handles reconnect)
       const { data } = await api.post(`/rooms/${roomId}/reconnect`);
       const roomData = data.data.room;
-      const gsData = data.data.gameState;
+      const gsData   = data.data.gameState;
 
       setRoom(roomData);
       if (gsData) setGameState(gsData);
 
-      // Determine my color
       const mySlot = roomData.players?.find(
         (p) => p.user?._id?.toString() === user._id?.toString() ||
                p.user?.toString() === user._id?.toString()
       );
       if (mySlot) setMyColor(mySlot.color);
 
-      // Connect socket
       const socket = connectSocket();
       setupSocketListeners(socket);
       socket.emit('room:join', { roomId });
@@ -54,18 +55,25 @@ export default function RoomPage() {
   };
 
   const setupSocketListeners = (socket) => {
-    socket.off('room:updated');
-    socket.off('game:start');
-    socket.off('game:state');
-    socket.off('dice:result');
-    socket.off('token:moved');
-    socket.off('game:finished');
-    socket.off('game:turn-changed');
-    socket.off('player:connected');
-    socket.off('player:disconnected');
+    // Clear previous listeners to avoid duplicates
+    [
+      'room:updated', 'room:credentials-published',
+      'game:start', 'game:state',
+      'dice:result', 'token:moved', 'game:finished',
+      'game:turn-changed', 'player:connected', 'player:disconnected', 'error',
+    ].forEach(e => socket.off(e));
 
     socket.on('room:updated', ({ room }) => {
       setRoom(room);
+    });
+
+    // Admin published Ludo King room credentials → update room in store
+    socket.on('room:credentials-published', ({ roomId: rid, externalRoomId, externalRoomPassword }) => {
+      setRoom(prev => prev
+        ? { ...prev, externalRoomId, externalRoomPassword }
+        : prev
+      );
+      toast.success('🎮 Admin shared the Ludo King Room ID!');
     });
 
     socket.on('game:start', ({ room, gameState }) => {
@@ -79,16 +87,14 @@ export default function RoomPage() {
     });
 
     socket.on('dice:result', ({ diceValue, color, movableTokens, autoSkip, forfeit }) => {
-      const { myColor, setDiceResult } = useGameStore.getState();
-      if (color === myColor) {
-        // My dice result — update movable tokens too
-        setDiceResult(diceValue, movableTokens || []);
+      const { myColor: mc, setDiceResult: sdr } = useGameStore.getState();
+      if (color === mc) {
+        sdr(diceValue, movableTokens || []);
       } else {
-        // Other player's dice — update value only, no movable tokens
-        setDiceResult(diceValue, []);
+        sdr(diceValue, []);
       }
       if (autoSkip) addEvent({ type: 'skip', color });
-      if (forfeit) addEvent({ type: 'forfeit', color });
+      if (forfeit)  addEvent({ type: 'forfeit', color });
     });
 
     socket.on('token:moved', ({ events, newState }) => {
@@ -109,18 +115,13 @@ export default function RoomPage() {
       addEvent({ type: 'turn_changed', color });
     });
 
-    socket.on('player:connected', ({ username }) => {
-      addEvent({ type: 'connected', username });
-    });
-
+    socket.on('player:connected',    ({ username }) => { addEvent({ type: 'connected', username }); });
     socket.on('player:disconnected', ({ username }) => {
       toast.warning(`${username} disconnected`);
       addEvent({ type: 'disconnected', username });
     });
 
-    socket.on('error', ({ message }) => {
-      toast.error(message);
-    });
+    socket.on('error', ({ message }) => { toast.error(message); });
   };
 
   const cleanup = () => {
@@ -134,16 +135,15 @@ export default function RoomPage() {
       <div className="min-h-screen bg-gaming-gradient flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 rounded-full border-2 border-purple-500 border-t-transparent animate-spin mx-auto mb-4" />
-          <p className="text-slate-400">Loading room...</p>
+          <p className="text-slate-400">Loading room…</p>
         </div>
       </div>
     );
   }
 
-  if (gameFinished) {
-    return <GameResult />;
-  }
+  if (gameFinished) return <GameResult />;
 
+  // Show waiting room when: game not started, or room is full but no game state yet
   if (!gameState || gameState.status === 'waiting' || room?.status === 'waiting' || room?.status === 'full') {
     return <WaitingRoom />;
   }

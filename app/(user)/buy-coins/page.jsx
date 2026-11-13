@@ -28,9 +28,13 @@ export default function BuyCoinsPage() {
   const [initiating, setInitiating] = useState(false);
 
   // Payment data after initiation
-  const [orderData, setOrderData] = useState(null); // { orderId, orderRef, upiUrl, qrCodeDataUrl, upiId, upiName, amountRupees }
+  const [orderData, setOrderData] = useState(null);
   const [copied, setCopied]       = useState('');
   const [pollCount, setPollCount] = useState(0);
+  const [screenshot, setScreenshot] = useState(null);        // File object
+  const [screenshotPreview, setScreenshotPreview] = useState(null); // base64 preview
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const fileInputRef = useRef(null);
   const pollRef = useRef(null);
 
   useEffect(() => { fetchSettings(); }, []);
@@ -119,16 +123,56 @@ export default function BuyCoinsPage() {
 
   const handleIPaid = async () => {
     if (!orderData) return;
+
+    // Screenshot is mandatory
+    if (!screenshot) {
+      toast.error('Please upload your payment screenshot first');
+      return;
+    }
+
     setInitiating(true);
     try {
+      // 1. Upload screenshot
+      setUploadingScreenshot(true);
+      const fd = new FormData();
+      fd.append('screenshot', screenshot);
+      await api.post(`/payment/screenshot/${orderData.orderId}`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setUploadingScreenshot(false);
+
+      // 2. Notify admin (fires alarm)
       await api.post(`/payment/notify/${orderData.orderId}`);
+
       setStep(STEP.VERIFYING);
       startPolling(orderData.orderId);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to notify admin');
+      setUploadingScreenshot(false);
+      toast.error(err.response?.data?.message || 'Failed to submit');
     } finally {
       setInitiating(false);
     }
+  };
+
+  const handleScreenshotChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Validate type
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Only JPG, PNG or WebP allowed');
+      return;
+    }
+    // Validate size (8MB)
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('Screenshot must be under 8 MB');
+      return;
+    }
+    setScreenshot(file);
+    // Generate preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setScreenshotPreview(ev.target.result);
+    reader.readAsDataURL(file);
   };
 
   const copy = (text, key) => {
@@ -342,9 +386,55 @@ export default function BuyCoinsPage() {
               <p>• Coins are credited only after admin verifies the payment</p>
             </div>
 
+            {/* Screenshot upload — mandatory */}
+            <div className="game-card p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0 text-xs text-purple-300 font-bold">4</div>
+                <p className="text-white font-semibold text-sm">Upload Payment Screenshot <span className="text-red-400">*</span></p>
+              </div>
+              <p className="text-slate-400 text-xs">Take a screenshot from your UPI app showing the payment confirmation and upload it here. Admin will verify it.</p>
+
+              {/* Preview */}
+              {screenshotPreview ? (
+                <div className="relative">
+                  <img src={screenshotPreview} alt="Payment screenshot" className="w-full max-h-48 object-contain rounded-xl border border-white/10 bg-black/20" />
+                  <button
+                    onClick={() => { setScreenshot(null); setScreenshotPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 flex items-center justify-center text-white text-xs hover:bg-red-500 transition-all"
+                  >✕</button>
+                  <p className="text-xs text-emerald-400 mt-1.5 flex items-center gap-1">
+                    <Check size={12} /> {screenshot?.name}
+                  </p>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-purple-500/30 rounded-xl p-6 text-center cursor-pointer hover:border-purple-500/60 hover:bg-purple-500/5 transition-all"
+                >
+                  <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-2">
+                    <QrCode size={20} className="text-purple-400" />
+                  </div>
+                  <p className="text-slate-300 text-sm font-medium">Tap to upload screenshot</p>
+                  <p className="text-slate-500 text-xs mt-1">JPG, PNG, WebP — max 8 MB</p>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleScreenshotChange}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <Button variant="secondary" onClick={() => setStep(STEP.SELECT)}>Go Back</Button>
-              <Button loading={initiating} onClick={handleIPaid} variant="success">
+              <Button
+                loading={initiating}
+                disabled={!screenshot}
+                onClick={handleIPaid}
+                variant="success"
+              >
                 <Check size={16} /> I Have Paid
               </Button>
             </div>
