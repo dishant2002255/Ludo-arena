@@ -131,27 +131,40 @@ export default function BuyCoinsPage() {
     }
 
     setInitiating(true);
+    setUploadingScreenshot(true);
+
     try {
       // 1. Upload screenshot
-      setUploadingScreenshot(true);
       const fd = new FormData();
       fd.append('screenshot', screenshot);
       await api.post(`/payment/screenshot/${orderData.orderId}`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setUploadingScreenshot(false);
-
-      // 2. Notify admin (fires alarm)
-      await api.post(`/payment/notify/${orderData.orderId}`);
-
-      setStep(STEP.VERIFYING);
-      startPolling(orderData.orderId);
     } catch (err) {
-      setUploadingScreenshot(false);
-      toast.error(err.response?.data?.message || 'Failed to submit');
-    } finally {
+      const msg = err.response?.data?.message || 'Failed to upload screenshot';
+      toast.error(msg);
       setInitiating(false);
+      setUploadingScreenshot(false);
+      return; // stop here — don't proceed to notify
     }
+
+    setUploadingScreenshot(false);
+
+    try {
+      // 2. Notify admin (fires alarm) — idempotent, safe to call even if already notified
+      await api.post(`/payment/notify/${orderData.orderId}`);
+    } catch (err) {
+      // Non-fatal: if notify fails (e.g. order already admin_notified), still proceed
+      const msg = err.response?.data?.message || '';
+      if (!msg.includes('admin_notified') && !msg.includes('already')) {
+        toast.warning('Screenshot uploaded but admin notification failed. Admin will still see your order.');
+      }
+    }
+
+    // 3. Move to verifying stage regardless
+    setStep(STEP.VERIFYING);
+    startPolling(orderData.orderId);
+    setInitiating(false);
   };
 
   const handleScreenshotChange = (e) => {
