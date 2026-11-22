@@ -3,22 +3,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, Gamepad2, Wallet, Trophy, User, LogOut, Coins, Menu, X, BookOpen, Swords, Shield
+  LayoutDashboard, Wallet, User, LogOut, Coins, Menu, X, Swords, Shield
 } from 'lucide-react';
 import { useState } from 'react';
 import useAuthStore from '@/store/authStore';
 import Avatar from '@/components/ui/Avatar';
 
 const navItems = [
-  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/tournaments',  label: 'Tournaments',  icon: Trophy },
-  { href: '/battles',      label: 'Open Battles', icon: Swords },
-  { href: '/matches',      label: 'Classic Play', icon: Gamepad2 },
-  { href: '/buy-coins',    label: 'Buy Coins',    icon: Coins },
-  { href: '/wallet',       label: 'Wallet',       icon: Wallet },
-  { href: '/leaderboard',  label: 'Leaderboard',  icon: Trophy },
-  { href: '/rules',        label: 'Rules',        icon: BookOpen },
-  { href: '/profile',      label: 'Profile',      icon: User },
+  { href: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/battles',     label: 'Open Battles', icon: Swords },
+  { href: '/buy-coins',   label: 'Buy Coins',    icon: Coins },
+  { href: '/wallet',      label: 'Wallet',       icon: Wallet },
+  { href: '/profile',     label: 'Profile',      icon: User },
 ];
 
 export default function UserSidebar() {
