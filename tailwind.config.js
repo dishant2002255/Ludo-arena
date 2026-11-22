@@ -8,97 +8,66 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Gaming dark palette
+        // AM2PM warm golden palette
+        gold: {
+          50:  '#fffde8',
+          100: '#fef9c3',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#f5c842',
+          500: '#e8a800',
+          600: '#c9960a',
+          700: '#a07010',
+          800: '#7a5000',
+          900: '#5a3c00',
+        },
+        cream: {
+          50:  '#fefefe',
+          100: '#fffdf5',
+          200: '#fdf6e3',
+          300: '#f5e9c8',
+          400: '#ece0b0',
+          500: '#e0d098',
+        },
+        // Green for battle cards
+        battle: {
+          light: '#e8f8f0',
+          mid:   '#d0f0e0',
+          border:'#a8dfc0',
+          dark:  '#0a7a3c',
+        },
+        // kept for admin pages
         navy: {
-          50: '#e8eaf6',
-          100: '#c5cae9',
-          200: '#9fa8da',
-          300: '#7986cb',
-          400: '#5c6bc0',
-          500: '#3949ab',
-          600: '#303f9f',
-          700: '#283593',
-          800: '#1a237e',
           900: '#0d1440',
           950: '#080d2e',
         },
-        // Purple accent
-        purple: {
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-        },
-        // Player colors
-        ludo: {
-          red: '#ef4444',
-          green: '#22c55e',
-          yellow: '#eab308',
-          blue: '#3b82f6',
-          'red-light': '#fca5a5',
-          'green-light': '#86efac',
-          'yellow-light': '#fde047',
-          'blue-light': '#93c5fd',
-          'red-dark': '#991b1b',
-          'green-dark': '#14532d',
-          'yellow-dark': '#713f12',
-          'blue-dark': '#1e3a8a',
-        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['Inter', 'system-ui', 'sans-serif'],
         display: ['Rajdhani', 'Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
       },
-      backgroundImage: {
-        'gaming-gradient': 'linear-gradient(135deg, #080d2e 0%, #0d1440 40%, #1a0533 100%)',
-        'card-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-        'purple-glow': 'radial-gradient(circle at center, rgba(139,92,246,0.3) 0%, transparent 70%)',
+      borderRadius: {
+        '2xl': '16px',
+        '3xl': '24px',
+        'full': '9999px',
       },
       animation: {
-        'spin-dice': 'spinDice 0.5s ease-out',
-        'bounce-token': 'bounceToken 0.3s ease-out',
-        'pulse-glow': 'pulseGlow 2s infinite',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'fade-in': 'fadeIn 0.4s ease-out',
-        'float': 'float 3s ease-in-out infinite',
+        'fade-in':    'fadeIn 0.3s ease-out',
+        'slide-up':   'slideUp 0.3s ease-out',
+        'live-pulse': 'livePulse 1.2s infinite',
+        'spin':       'spin 1s linear infinite',
+        'marquee':    'marquee 30s linear infinite',
       },
       keyframes: {
-        spinDice: {
-          '0%': { transform: 'rotateX(0deg) rotateY(0deg)' },
-          '100%': { transform: 'rotateX(360deg) rotateY(360deg)' },
-        },
-        bounceToken: {
-          '0%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.3)' },
-          '100%': { transform: 'scale(1)' },
-        },
-        pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' },
-          '50%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(139, 92, 246, 0.3)' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: 0 },
-          '100%': { transform: 'translateY(0)', opacity: 1 },
-        },
-        fadeIn: {
-          '0%': { opacity: 0 },
-          '100%': { opacity: 1 },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-8px)' },
-        },
+        fadeIn:    { from: { opacity: 0, transform: 'translateY(6px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        slideUp:   { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        livePulse: { '0%,100%': { opacity: 1, transform: 'scale(1)' }, '50%': { opacity: 0.5, transform: 'scale(1.4)' } },
+        marquee:   { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
       boxShadow: {
-        'glow-purple': '0 0 20px rgba(139, 92, 246, 0.4)',
-        'glow-red': '0 0 15px rgba(239, 68, 68, 0.4)',
-        'glow-green': '0 0 15px rgba(34, 197, 94, 0.4)',
-        'glow-yellow': '0 0 15px rgba(234, 179, 8, 0.4)',
-        'glow-blue': '0 0 15px rgba(59, 130, 246, 0.4)',
-        'card': '0 4px 24px rgba(0, 0, 0, 0.4)',
-        'card-hover': '0 8px 40px rgba(0, 0, 0, 0.6)',
+        'gold':   '0 3px 12px rgba(201,150,10,0.25)',
+        'green':  '0 3px 12px rgba(10,122,60,0.2)',
+        'card':   '0 2px 10px rgba(180,140,0,0.08)',
       },
     },
   },

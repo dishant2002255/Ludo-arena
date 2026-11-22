@@ -1,0 +1,131 @@
+﻿
+> ludo-arena-client@1.0.0 build
+> next build
+
+  Γû▓ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe :  ΓÜá Compiled with 
+warnings
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpe 
+   cified: ( ΓÜá Compiled with warn  
+  ings:String) [], RemoteException
+    + FullyQualifiedErrorId : Native 
+   CommandError
+ 
+
+./app/admin/matches/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/matches/page.jsx
+
+./app/admin/rooms/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/rooms/page.jsx
+
+./app/admin/tournaments/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/tournaments/page.jsx
+
+ ΓÜá Compiled with warnings
+
+./app/admin/matches/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/matches/page.jsx
+
+./app/admin/rooms/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/rooms/page.jsx
+
+./app/admin/tournaments/page.jsx
+Attempted import error: 
+'StatusBadge' is not exported from 
+'@/components/ui/Badge' (imported as 
+'StatusBadge').
+
+Import trace for requested module:
+./app/admin/tournaments/page.jsx
+
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/29) ...
+   Generating static pages (7/29) 
+   Generating static pages (14/29) 
+   Generating static pages (21/29) 
+ Γ£ô Generating static pages (29/29)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+Γöî Γùï /                                    7.6 kB          137 kB
+Γö£ Γùï /_not-found                          142 B          87.4 kB
+Γö£ Γùï /admin/dashboard                     4.05 kB         158 kB
+Γö£ Γùï /admin/logs                          1.68 kB         113 kB
+Γö£ Γùï /admin/matches                       2.1 kB          114 kB
+Γö£ Γùï /admin/payments                      8.07 kB         172 kB
+Γö£ Γùï /admin/results                       3.03 kB         115 kB
+Γö£ Γùï /admin/rooms                         7.38 kB         164 kB
+Γö£ Γùï /admin/settings                      4.94 kB         113 kB
+Γö£ Γùï /admin/sub-admins                    6.82 kB         115 kB
+Γö£ Γùï /admin/tournaments                   5.43 kB         124 kB
+Γö£ ╞Æ /admin/tournaments/[id]              5.55 kB         124 kB
+Γö£ Γùï /admin/users                         4.29 kB         113 kB
+Γö£ Γùï /admin/wallet                        6.32 kB         158 kB
+Γö£ Γùï /battles                             9.87 kB         141 kB
+Γö£ ╞Æ /battles/[id]                        9.05 kB         140 kB
+Γö£ Γùï /buy-coins                           11.3 kB         175 kB
+Γö£ Γùï /buy-coins/checkout                  377 B          87.6 kB
+Γö£ Γùï /dashboard                           5.1 kB          120 kB
+Γö£ Γùï /forgot-password                     3.47 kB         119 kB
+Γö£ Γùï /leaderboard                         372 B          87.6 kB
+Γö£ Γùï /login                               2.69 kB         120 kB
+Γö£ Γùï /matches                             372 B          87.6 kB
+Γö£ Γùï /profile                             6.15 kB         150 kB
+Γö£ Γùï /register                            3.01 kB         121 kB
+Γö£ ╞Æ /room/[roomId]                       15.5 kB         172 kB
+Γö£ Γùï /rules                               2.88 kB        90.1 kB
+Γö£ Γùï /subadmin                            7.58 kB         122 kB
+Γö£ Γùï /tournaments                         372 B          87.6 kB
+Γö£ ╞Æ /tournaments/[id]                    9.96 kB         173 kB
+Γöö Γùï /wallet                              6.36 kB         131 kB
++ First Load JS shared by all            87.2 kB
+  Γö£ chunks/7023-d9d5d2f31f4112d0.js      31.5 kB
+  Γö£ chunks/fd9d1056-6c7ab7fb37df3461.js  53.6 kB
+  Γöö other shared chunks (total)          2.06 kB
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

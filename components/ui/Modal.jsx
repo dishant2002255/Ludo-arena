@@ -1,82 +1,44 @@
 'use client';
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md', className = '' }) {
-  const sizeMap = {
-    sm: 'max-w-sm',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-7xl',
-  };
+const SIZE = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-xl', xl: 'max-w-2xl' };
 
-  // Lock body scroll when modal is open
+export default function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  useEffect(() => {
-    const handleKey = (e) => { if (e.key === 'Escape') onClose?.(); };
-    if (isOpen) document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          // Allow clicking the scroll area outside the modal to close
-          onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
-        >
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm -z-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{ background: 'rgba(0,0,0,0.4)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
 
-          {/* Modal — scrollable, never taller than viewport */}
-          <motion.div
-            className={`relative w-full ${sizeMap[size]} game-card my-auto ${className}`}
-            style={{ marginTop: '1rem', marginBottom: '1rem' }}
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Sticky title header */}
-            {title && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-navy-900 rounded-t-2xl z-10">
-                <h2 className="text-lg font-semibold text-white">{title}</h2>
-                {onClose && (
-                  <button
-                    onClick={onClose}
-                    className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10 shrink-0"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
-              </div>
-            )}
+      <div
+        className={`w-full ${SIZE[size] || SIZE.md} rounded-t-3xl sm:rounded-3xl overflow-hidden`}
+        style={{ background: '#fffdf5', border: '1.5px solid #e8d49a', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+      >
+        {/* Header */}
+        {title && (
+          <div className="flex items-center justify-between px-5 py-4 shrink-0"
+            style={{ borderBottom: '1.5px solid #e8d49a' }}>
+            <h2 className="font-black text-base" style={{ color: '#3b2800' }}>{title}</h2>
+            <button onClick={onClose}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+              style={{ background: '#f0e6c8', color: '#c9960a' }}>
+              <X size={16} />
+            </button>
+          </div>
+        )}
 
-            {/* Scrollable content */}
-            {children}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        {/* Body */}
+        <div className="overflow-y-auto flex-1">
+          {children}
+        </div>
+      </div>
+    </div>
   );
 }

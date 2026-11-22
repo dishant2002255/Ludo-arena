@@ -4,160 +4,204 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap');
 
+/* ── AM2PM-style warm golden theme ───────────────────────────────────────── */
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
   body {
-    background: #080d2e;
-    color: #e2e8f0;
+    background: #fdf6e3;
+    color: #2d2a1e;
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.4);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.7);
-  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #f0e6c8; }
+  ::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 4px; }
 }
 
 @layer components {
-  /* Gaming card */
+
+  /* ── App shell ──────────────────────────────────────────────────────────── */
+  .app-bg        { @apply bg-[#fdf6e3]; }
+  .app-bg-dark   { @apply bg-[#f5e9c8]; }
+  .app-border    { border-color: #e8d49a; }
+  .gold-btn      { @apply bg-gradient-to-b from-[#f5c842] to-[#c9960a] text-[#3b2800] font-bold rounded-full shadow-md active:scale-95 transition-transform; }
+  .gold-btn-sm   { @apply gold-btn px-5 py-2 text-sm; }
+  .gold-btn-lg   { @apply gold-btn px-8 py-3.5 text-base; }
+
+  /* ── Game card (cream cards with golden border) ─────────────────────────── */
   .game-card {
-    @apply bg-navy-900/80 border border-white/10 rounded-2xl backdrop-blur-sm;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    background: #fffdf5;
+    border: 1.5px solid #e8d49a;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(180,140,0,0.08);
   }
-
   .game-card-hover {
-    @apply game-card transition-all duration-300 hover:border-purple-500/30 hover:-translate-y-1;
-    &:hover { box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.1); }
+    @apply game-card transition-all duration-200 hover:-translate-y-0.5;
+    &:hover { box-shadow: 0 6px 24px rgba(180,140,0,0.15); }
   }
 
-  /* Gradient text */
-  .gradient-text {
-    @apply bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent;
+  /* ── Battle card (green mint gradient — like AM2PM) ─────────────────────── */
+  .battle-card {
+    background: linear-gradient(135deg, #e8f8f0 0%, #d0f0e0 100%);
+    border: 1.5px solid #a8dfc0;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,160,80,0.08);
+  }
+  .battle-card-running {
+    background: linear-gradient(135deg, #e8f8f0 0%, #c8ecd8 100%);
+    border: 1.5px solid #7ecba4;
+    border-radius: 14px;
   }
 
-  .gold-text {
-    @apply bg-gradient-to-r from-yellow-400 to-amber-300 bg-clip-text text-transparent;
+  /* ── Section header pill (like "Open Battles × ") ───────────────────────── */
+  .section-pill {
+    @apply flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold;
+    background: #fff3c4;
+    border: 1.5px solid #e8c84a;
+    color: #7a5a00;
   }
 
-  /* Buttons */
-  .btn-primary {
-    @apply bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold
-           px-6 py-3 rounded-xl transition-all duration-200 
-           hover:from-purple-500 hover:to-indigo-500 hover:shadow-glow-purple
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  /* ── Top header ─────────────────────────────────────────────────────────── */
+  .top-header {
+    @apply sticky top-0 z-50 flex items-center justify-between px-4 py-3;
+    background: #fffdf5;
+    border-bottom: 1.5px solid #e8d49a;
   }
 
-  .btn-secondary {
-    @apply bg-white/10 text-white font-medium px-6 py-3 rounded-xl 
-           border border-white/20 transition-all duration-200
-           hover:bg-white/20 hover:border-white/30
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  /* ── Bottom nav ─────────────────────────────────────────────────────────── */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-2 px-2;
+    background: #fffdf5;
+    border-top: 1.5px solid #e8d49a;
+    box-shadow: 0 -4px 20px rgba(180,140,0,0.08);
+  }
+  .bottom-nav-item {
+    @apply flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all min-w-0;
+  }
+  .bottom-nav-item.active {
+    color: #c9960a;
+  }
+  .bottom-nav-item:not(.active) {
+    color: #a09070;
   }
 
-  .btn-danger {
-    @apply bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold
-           px-6 py-3 rounded-xl transition-all duration-200
-           hover:from-red-500 hover:to-rose-500
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  /* ── Entry amount input (like AM2PM) ─────────────────────────────────────── */
+  .amount-input-wrap {
+    @apply flex items-center rounded-full overflow-hidden border;
+    background: #fffdf5;
+    border-color: #e8d49a;
   }
-
-  .btn-success {
-    @apply bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold
-           px-6 py-3 rounded-xl transition-all duration-200
-           hover:from-emerald-500 hover:to-green-500
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  .amount-input-wrap input {
+    @apply flex-1 bg-transparent px-4 py-3 text-sm font-medium outline-none;
+    color: #3b2800;
   }
+  .amount-input-wrap input::placeholder { color: #b0956a; }
 
-  /* Input */
+  /* ── Input field ─────────────────────────────────────────────────────────── */
   .input-field {
-    @apply w-full bg-navy-900/60 border border-white/15 rounded-xl px-4 py-3
-           text-white placeholder-slate-500 outline-none transition-all duration-200
-           focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20;
+    @apply w-full rounded-xl px-4 py-3 text-sm font-medium outline-none transition-all duration-200;
+    background: #fffdf5;
+    border: 1.5px solid #e8d49a;
+    color: #2d2a1e;
+  }
+  .input-field::placeholder { color: #b0956a; }
+  .input-field:focus { border-color: #c9960a; box-shadow: 0 0 0 3px rgba(201,150,10,0.12); }
+
+  /* ── select styled ───────────────────────────────────────────────────────── */
+  select.input-field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b0956a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
   }
 
-  /* Badge */
-  .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  /* ── Gradient text ───────────────────────────────────────────────────────── */
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#c9960a] to-[#f5c842] bg-clip-text text-transparent;
+  }
+  .gold-text {
+    @apply bg-gradient-to-r from-[#c9960a] to-[#e8b020] bg-clip-text text-transparent;
   }
 
-  .badge-green  { @apply badge bg-emerald-500/20 text-emerald-400 border border-emerald-500/30; }
-  .badge-red    { @apply badge bg-red-500/20 text-red-400 border border-red-500/30; }
-  .badge-yellow { @apply badge bg-yellow-500/20 text-yellow-400 border border-yellow-500/30; }
-  .badge-blue   { @apply badge bg-blue-500/20 text-blue-400 border border-blue-500/30; }
-  .badge-purple { @apply badge bg-purple-500/20 text-purple-400 border border-purple-500/30; }
-  .badge-gray   { @apply badge bg-slate-500/20 text-slate-400 border border-slate-500/30; }
+  /* ── Badge ───────────────────────────────────────────────────────────────── */
+  .badge { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+  .badge-green  { @apply badge; background: #dcf5e8; color: #0a7a3c; border: 1px solid #a8dfc0; }
+  .badge-red    { @apply badge; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge-yellow { @apply badge; background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+  .badge-blue   { @apply badge; background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .badge-purple { @apply badge; background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+  .badge-gray   { @apply badge; background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
 
-  /* Stat card */
-  .stat-card {
-    @apply game-card p-6 flex flex-col gap-2;
+  /* ── Stat card ───────────────────────────────────────────────────────────── */
+  .stat-card { @apply game-card p-4 flex flex-col gap-1; }
+  .section-title { @apply text-lg font-bold tracking-wide; color: #3b2800; }
+
+  /* ── Buttons ─────────────────────────────────────────────────────────────── */
+  .btn-primary {
+    @apply font-bold px-5 py-2.5 rounded-full transition-all duration-200 active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-md;
+    background: linear-gradient(to bottom, #f5c842, #c9960a);
+    color: #3b2800;
+    box-shadow: 0 3px 10px rgba(201,150,10,0.3);
+  }
+  .btn-secondary {
+    @apply font-semibold px-5 py-2.5 rounded-full transition-all duration-200 active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #f0e6c8;
+    color: #7a5a00;
+    border: 1.5px solid #e8d49a;
+  }
+  .btn-danger {
+    @apply font-bold px-5 py-2.5 rounded-full transition-all duration-200 active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1.5px solid #fca5a5;
+  }
+  .btn-success {
+    @apply font-bold px-5 py-2.5 rounded-full transition-all duration-200 active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-md;
+    background: linear-gradient(to bottom, #2ecc71, #0a7a3c);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(10,122,60,0.3);
   }
 
-  /* Section heading */
-  .section-title {
-    @apply text-xl font-semibold text-white font-display tracking-wide;
+  /* ── Announcement / info banner ──────────────────────────────────────────── */
+  .info-banner {
+    @apply text-sm rounded-2xl px-4 py-3;
+    background: #fffde8;
+    border: 1.5px solid #f0d060;
+    color: #5a4200;
   }
 
-  /* Gradient border card */
-  .gradient-border {
-    position: relative;
-    border-radius: 1rem;
+  /* ── Live indicator dot ──────────────────────────────────────────────────── */
+  .live-dot {
+    @apply inline-block w-2 h-2 rounded-full bg-red-500;
+    animation: livePulse 1.2s infinite;
   }
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(99, 102, 241, 0.4), transparent);
-    z-index: -1;
+
+  /* ── animations ─────────────────────────────────────────────────────────── */
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(1.4); }
   }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 }
 
-/* Ludo-specific */
-.ludo-board-container {
-  aspect-ratio: 1;
-  max-width: 560px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* Dice animation */
-.dice-rolling {
-  animation: spinDice 0.5s ease-out;
-}
-
-@keyframes spinDice {
-  0%   { transform: rotateX(0) rotateY(0) rotateZ(0); }
-  33%  { transform: rotateX(120deg) rotateY(120deg) rotateZ(0deg); }
-  66%  { transform: rotateX(240deg) rotateY(60deg) rotateZ(180deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
-}
-
-/* Token highlight pulse */
-.token-movable {
-  animation: tokenPulse 1s ease-in-out infinite;
-}
-@keyframes tokenPulse {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 4px currentColor); }
-  50%       { filter: brightness(1.4) drop-shadow(0 0 12px currentColor); }
+/* Gaming gradient kept for admin/auth pages only */
+.bg-gaming-gradient {
+  background: #fdf6e3;
 }
