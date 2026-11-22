@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import {
-  Coins, TrendingUp, TrendingDown, Trophy, ShoppingCart, Lock, ArrowDownToLine, Building2,
+  Coins, TrendingUp, TrendingDown, Trophy, ShoppingCart, ArrowDownToLine,
+  Gamepad2, Info,
 } from 'lucide-react';
 import Link from 'next/link';
-import { StatCard } from '@/components/ui/Card';
 import { TableSkeleton } from '@/components/ui/LoadingSkeleton';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -17,43 +17,118 @@ import { formatDistanceToNow, format } from 'date-fns';
 
 const TYPE_CONFIG = {
   registration_bonus:  { label: 'Welcome Bonus',      color: 'green'  },
-  daily_bonus:         { label: 'Daily Bonus',        color: 'green'  },
-  match_entry:         { label: 'Match Entry',        color: 'red'    },
-  match_win:           { label: 'Match Win Reward',  color: 'green'  },
-  admin_adjust:        { label: 'Admin Adjustment',   color: 'blue'   },
-  coin_request:        { label: 'Coin Request Grant', color: 'purple' },
-  admin_correction:    { label: 'Admin Correction',   color: 'blue'   },
-  tournament_reward:   { label: 'Tournament Reward', color: 'yellow' },
-  coin_purchase:       { label: 'UPI Coin Purchase',  color: 'green'  },
-  refund:              { label: 'Refund',              color: 'yellow' },
-  battle_entry:        { label: 'Battle Entry',       color: 'red'    },
-  battle_win:          { label: 'Battle Win',          color: 'green'  },
-  battle_refund:       { label: 'Battle Refund',      color: 'yellow' },
-  withdrawal_lock:     { label: 'Withdrawal Locked',  color: 'red'    },
-  withdrawal_approved: { label: 'Withdrawal Paid',    color: 'blue'   },
-  withdrawal_refund:  { label: 'Withdrawal Refund',   color: 'yellow' },
+  daily_bonus:         { label: 'Daily Bonus',         color: 'green'  },
+  match_entry:         { label: 'Match Entry',         color: 'red'    },
+  match_win:           { label: 'Match Win Reward',    color: 'green'  },
+  admin_adjust:        { label: 'Admin Adjustment',    color: 'blue'   },
+  coin_request:        { label: 'Coin Request Grant',  color: 'purple' },
+  admin_correction:    { label: 'Admin Correction',    color: 'blue'   },
+  tournament_reward:   { label: 'Tournament Reward',   color: 'yellow' },
+  coin_purchase:       { label: 'UPI Coin Purchase',   color: 'green'  },
+  refund:              { label: 'Refund',               color: 'yellow' },
+  battle_entry:        { label: 'Battle Entry',         color: 'red'    },
+  battle_win:          { label: 'Battle Win 🏆',        color: 'green'  },
+  battle_refund:       { label: 'Battle Refund',        color: 'yellow' },
+  withdrawal_lock:     { label: 'Withdrawal Locked',    color: 'red'    },
+  withdrawal_approved: { label: 'Withdrawal Paid ✓',   color: 'blue'   },
+  withdrawal_refund:   { label: 'Withdrawal Refunded',  color: 'yellow' },
 };
 
 const WD_STATUS = {
-  pending:  { label: 'Pending',  badge: 'yellow' },
-  approved: { label: 'Paid',    badge: 'green'  },
-  rejected: { label: 'Refunded', badge: 'red'   },
+  pending:  { label: 'Pending',   badge: 'yellow' },
+  approved: { label: 'Paid ✓',   badge: 'green'  },
+  rejected: { label: 'Refunded', badge: 'red'    },
 };
+
+function DualWalletCard({ wallet, onWithdraw }) {
+  const totalPlayable = wallet.balance;
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-white font-bold">{wallet.subAdminName}</p>
+          <p className={`text-xs ${wallet.subAdminActive ? 'text-emerald-400' : 'text-red-400'}`}>
+            {wallet.subAdminActive ? '● Active' : '● Inactive'}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-500">Total Playable</p>
+          <p className="text-xl font-black text-white">₹{totalPlayable.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Dual buckets */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-center">
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Gamepad2 size={13} className="text-blue-400" />
+            <p className="text-xs text-blue-300 font-semibold">Deposit Coins</p>
+          </div>
+          <p className="text-2xl font-black text-blue-400">₹{(wallet.depositBalance || 0).toLocaleString()}</p>
+          <p className="text-xs text-blue-400/60 mt-0.5">Play Only</p>
+        </div>
+
+        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <Trophy size={13} className="text-emerald-400" />
+            <p className="text-xs text-emerald-300 font-semibold">Winning Coins</p>
+          </div>
+          <p className="text-2xl font-black text-emerald-400">₹{(wallet.winningBalance || 0).toLocaleString()}</p>
+          <p className="text-xs text-emerald-400/60 mt-0.5">Withdrawable ✓</p>
+        </div>
+      </div>
+
+      {/* Escrow indicators */}
+      {(wallet.lockedBattleBalance > 0 || wallet.lockedWithdrawalBalance > 0) && (
+        <div className="flex gap-2 text-xs">
+          {wallet.lockedBattleBalance > 0 && (
+            <span className="px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              🔒 ₹{wallet.lockedBattleBalance} in battle
+            </span>
+          )}
+          {wallet.lockedWithdrawalBalance > 0 && (
+            <span className="px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              🔒 ₹{wallet.lockedWithdrawalBalance} in withdrawal
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <Link href={`/battles?subAdminId=${wallet.subAdminId}`} className="flex-1">
+          <Button size="sm" fullWidth variant="secondary" icon={<Gamepad2 size={13} />}>
+            Play Battles
+          </Button>
+        </Link>
+        <Button
+          size="sm"
+          icon={<ArrowDownToLine size={13} />}
+          disabled={!wallet.winningBalance || wallet.winningBalance <= 0}
+          onClick={() => onWithdraw(wallet)}
+        >
+          Withdraw
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function WalletPage() {
   const { user, refreshUser } = useAuthStore();
-  const [balance, setBalance]           = useState(null);
+  const [balance, setBalance]       = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [subWallets, setSubWallets]     = useState([]);
-  const [withdrawals, setWithdrawals]    = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [tab, setTab]                   = useState('transactions'); // transactions | withdrawals
-  const [wdModal, setWdModal]            = useState(false);
-  const [wdForm, setWdForm]             = useState({
-    subAdminId: '', amountCoins: 200, payoutMethod: 'upi',
-    userUpiId: '', accountHolderName: '',
+  const [subWallets, setSubWallets]  = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [loading, setLoading]        = useState(true);
+  const [tab, setTab]                = useState('wallets'); // wallets | transactions | withdrawals
+  const [wdModal, setWdModal]        = useState(false);
+  const [wdWallet, setWdWallet]      = useState(null);
+  const [wdForm, setWdForm]          = useState({
+    amountCoins: 200, payoutMethod: 'upi', userUpiId: '', accountHolderName: '',
   });
-  const [submitting, setSubmitting]     = useState(false);
+  const [submitting, setSubmitting]  = useState(false);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -77,16 +152,17 @@ export default function WalletPage() {
     }
   };
 
-  const withdrawableWallet = subWallets.find(
-    (w) => w.subAdminId === wdForm.subAdminId
-  );
+  const openWithdrawModal = (wallet) => {
+    setWdWallet(wallet);
+    setWdForm({ amountCoins: Math.min(200, wallet.winningBalance || 0), payoutMethod: 'upi', userUpiId: '', accountHolderName: '' });
+    setWdModal(true);
+  };
 
   const submitWithdrawal = async () => {
-    const wallet = subWallets.find((w) => w.subAdminId === wdForm.subAdminId);
-    if (!wallet) { toast.error('Select a Sub-Admin'); return; }
+    if (!wdWallet) { toast.error('No wallet selected'); return; }
     if (wdForm.amountCoins < 1) { toast.error('Enter a valid amount'); return; }
-    if (wdForm.amountCoins > wallet.balance) {
-      toast.error(`Available under ${wallet.subAdminName}: ${wallet.balance} coins`);
+    if ((wdWallet.winningBalance || 0) < wdForm.amountCoins) {
+      toast.error(`Available Winning Balance: ₹${wdWallet.winningBalance || 0}. Only winning coins are withdrawable.`);
       return;
     }
     if (wdForm.payoutMethod === 'upi' && !wdForm.userUpiId.includes('@')) {
@@ -100,7 +176,7 @@ export default function WalletPage() {
     setSubmitting(true);
     try {
       const { data } = await api.post('/withdrawals', {
-        subAdminId: wdForm.subAdminId,
+        subAdminId: wdWallet.subAdminId,
         amountCoins: wdForm.amountCoins,
         payoutMethod: wdForm.payoutMethod,
         userUpiId: wdForm.userUpiId,
@@ -108,7 +184,6 @@ export default function WalletPage() {
       });
       toast.success(data.message);
       setWdModal(false);
-      setWdForm({ subAdminId: '', amountCoins: 200, payoutMethod: 'upi', userUpiId: '', accountHolderName: '' });
       await refreshUser();
       fetchAll();
     } catch (err) {
@@ -118,113 +193,91 @@ export default function WalletPage() {
     }
   };
 
+  // Totals across all sub-wallets
+  const totalDeposit  = subWallets.reduce((s, w) => s + (w.depositBalance || 0), 0);
+  const totalWinning  = subWallets.reduce((s, w) => s + (w.winningBalance || 0), 0);
+  const totalPlayable = totalDeposit + totalWinning;
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white font-display">Wallet</h1>
+          <h1 className="text-3xl font-bold text-white font-display">My Wallet</h1>
           <p className="text-slate-400 mt-1">1 coin = ₹1 · Real-money balance</p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/buy-coins">
-            <Button icon={<ShoppingCart size={18} />} variant="primary" size="sm">Buy Coins</Button>
-          </Link>
-          <Button
-            icon={<ArrowDownToLine size={18} />}
-            variant="secondary"
-            size="sm"
-            onClick={() => setWdModal(true)}
-            disabled={subWallets.filter((w) => w.balance > 0).length === 0}
-          >
-            Withdraw
-          </Button>
+        <Link href="/buy-coins">
+          <Button icon={<ShoppingCart size={18} />} variant="primary" size="sm">Buy Coins via UPI</Button>
+        </Link>
+      </div>
+
+      {/* Top summary — dual wallet */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-blue-500/30 bg-blue-500/5 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Gamepad2 size={18} className="text-blue-400" />
+            <p className="text-sm text-blue-300 font-semibold">🎮 Deposit Coins</p>
+          </div>
+          <p className="text-3xl font-black text-blue-400">₹{totalDeposit.toLocaleString()}</p>
+          <p className="text-xs text-blue-400/60 mt-1">Play Only — Not Withdrawable</p>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Trophy size={18} className="text-emerald-400" />
+            <p className="text-sm text-emerald-300 font-semibold">🏆 Winning Coins</p>
+          </div>
+          <p className="text-3xl font-black text-emerald-400">₹{totalWinning.toLocaleString()}</p>
+          <p className="text-xs text-emerald-400/60 mt-1">Withdrawable to UPI ✓</p>
+        </div>
+
+        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Coins size={18} className="text-yellow-400" />
+            <p className="text-sm text-yellow-300 font-semibold">Total Playable</p>
+          </div>
+          <p className="text-3xl font-black text-yellow-400">₹{totalPlayable.toLocaleString()}</p>
+          <p className="text-xs text-yellow-400/60 mt-1">Deposit + Winning</p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading ? Array.from({ length: 4 }).map((_, i) => <TableSkeleton key={i} />) : (
-          <>
-            <StatCard title="Balance"        value={`${user?.walletBalance?.toLocaleString() || 0}`} icon={<Coins size={22} />} color="yellow" />
-            <StatCard title="Total Earned"   value={(balance?.totalEarned || 0).toLocaleString()}     icon={<TrendingUp size={22} />}  color="green" />
-            <StatCard title="Total Used"     value={(balance?.totalSpent || 0).toLocaleString()}      icon={<TrendingDown size={22} />} color="red" />
-            <StatCard title="Match Rewards"  value={(balance?.totalMatchRewards || 0).toLocaleString()} icon={<Trophy size={22} />}  color="purple" />
-          </>
-        )}
-      </div>
-
-      {/* Sub-wallets per Sub-Admin */}
-      <div>
-        <h2 className="text-lg font-semibold text-white mb-3">Coin Wallets by Sub-Admin</h2>
-        {loading ? <TableSkeleton /> : subWallets.length === 0 ? (
-          <div className="game-card p-8 text-center text-slate-400">
-            <Coins size={36} className="mx-auto mb-3 text-slate-600" />
-            <p>No coin wallets yet. Buy coins from a Sub-Admin to get started.</p>
-            <Link href="/buy-coins" className="text-purple-400 underline text-sm mt-2 inline-block">Buy Coins →</Link>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {subWallets.map((w) => (
-              <div key={w.subAdminId} className="game-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-white font-semibold">{w.subAdminName}</p>
-                    <p className="text-xs text-slate-500">
-                      {w.subAdminActive ? 'Active' : 'Inactive'}
-                    </p>
-                  </div>
-                  <Badge variant={w.balance > 0 ? 'green' : 'gray'}>
-                    {(w.balance || 0).toLocaleString()} coins
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <p className="text-slate-500">In Battles</p>
-                    <p className="text-amber-400 font-semibold">{w.lockedBattleBalance || 0}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <p className="text-slate-500">In Withdrawal</p>
-                    <p className="text-amber-400 font-semibold">{w.lockedWithdrawalBalance || 0}</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/5">
-                    <p className="text-slate-500">Withdrew</p>
-                    <p className="text-slate-300 font-semibold">{w.totalWithdrawn || 0}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between">
-                  <Link href={`/battles?subAdminId=${w.subAdminId}`} className="text-xs text-purple-400 hover:underline">
-                    Play battles under {w.subAdminName} →
-                  </Link>
-                  <button
-                    className="text-xs text-emerald-400 hover:underline disabled:text-slate-600"
-                    disabled={w.balance <= 0}
-                    onClick={() => {
-                      setWdForm({ ...wdForm, subAdminId: w.subAdminId });
-                      setWdModal(true);
-                    }}
-                  >
-                    Withdraw
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Info banner */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+        <Info size={16} className="text-blue-400 mt-0.5 shrink-0" />
+        <p className="text-xs text-slate-400">
+          <span className="text-blue-300 font-semibold">Deposit Coins</span> (bought via UPI) are for gameplay only.{' '}
+          <span className="text-emerald-300 font-semibold">Winning Coins</span> (earned from battle wins) can be withdrawn to your UPI anytime (Min ₹200).
+          Purchased coins are <strong className="text-white">never directly withdrawable</strong> — win battles to earn withdrawable coins!
+        </p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-2">
-        {[['transactions', 'Transaction History'], ['withdrawals', 'Withdrawals']].map(([key, label]) => (
+      <div className="flex gap-2 flex-wrap">
+        {[['wallets', '💼 My Wallets'], ['transactions', '📋 History'], ['withdrawals', '💸 Withdrawals']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)}
             className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all
-              ${tab === key
-                ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-                : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>
+              ${tab === key ? 'bg-purple-500/20 border-purple-500/40 text-purple-300' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>
             {label}
           </button>
         ))}
       </div>
+
+      {/* Sub-wallet cards */}
+      {tab === 'wallets' && (
+        loading ? <TableSkeleton /> : subWallets.length === 0 ? (
+          <div className="game-card p-10 text-center text-slate-400">
+            <Coins size={36} className="mx-auto mb-3 text-slate-600" />
+            <p>No coin wallets yet.</p>
+            <Link href="/buy-coins" className="text-purple-400 underline text-sm mt-2 inline-block">Buy Coins from a Sub-Admin →</Link>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {subWallets.map((w) => (
+              <DualWalletCard key={w.subAdminId} wallet={w} onWithdraw={openWithdrawModal} />
+            ))}
+          </div>
+        )
+      )}
 
       {/* Transactions */}
       {tab === 'transactions' && (
@@ -251,7 +304,7 @@ export default function WalletPage() {
                       <p className={`text-sm font-bold ${tx.amount > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                       </p>
-                      <p className="text-xs text-slate-500">Balance: {tx.balanceAfter?.toLocaleString()}</p>
+                      <p className="text-xs text-slate-500">Bal: {tx.balanceAfter?.toLocaleString()}</p>
                       <p className="text-xs text-slate-600">
                         {tx.createdAt ? formatDistanceToNow(new Date(tx.createdAt), { addSuffix: true }) : ''}
                       </p>
@@ -281,15 +334,15 @@ export default function WalletPage() {
                         <Badge variant={st.badge}>{st.label}</Badge>
                       </div>
                       <p className="text-xs text-slate-400">
-                        Via {wd.payoutMethod?.toUpperCase()} to {wd.userUpiId || 'bank'} · {wd.subAdmin?.subAdminInfo?.displayName || 'Sub-Admin'}
+                        Via {wd.payoutMethod?.toUpperCase()} to {wd.userUpiId || 'bank'}
                       </p>
                       <p className="text-xs text-slate-600 font-mono">{wd.withdrawalReference}</p>
                       {wd.utrReference && <p className="text-xs text-emerald-400">UTR: {wd.utrReference}</p>}
                       {wd.adminRemarks && <p className="text-xs text-amber-400 mt-0.5 italic">Admin: {wd.adminRemarks}</p>}
                     </div>
-                    <div className="text-right shrink-0 text-xs text-slate-500">
-                      <p>{wd.createdAt ? format(new Date(wd.createdAt), 'dd MMM yyyy, HH:mm') : ''}</p>
-                    </div>
+                    <p className="text-right text-xs text-slate-500 shrink-0">
+                      {wd.createdAt ? format(new Date(wd.createdAt), 'dd MMM yy, HH:mm') : ''}
+                    </p>
                   </div>
                 );
               })}
@@ -299,39 +352,22 @@ export default function WalletPage() {
       )}
 
       {/* Withdraw modal */}
-      <Modal isOpen={wdModal} onClose={() => setWdModal(false)} title="Withdraw Coins (1 coin = ₹1)">
+      <Modal isOpen={wdModal} onClose={() => setWdModal(false)} title="Withdraw Winning Coins">
         <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
-            Coins are sent back to the Sub-Admin and you receive ₹1 per coin via UPI, paid by your Sub-Admin.
-            Your coins are locked until the payout is approved or refunded.
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-slate-300">Withdraw from</label>
-            <select
-              className="input-field"
-              value={wdForm.subAdminId}
-              onChange={(e) => setWdForm({ ...wdForm, subAdminId: e.target.value })}
-            >
-              <option value="">Select Sub-Admin wallet…</option>
-              {subWallets.filter((w) => w.balance > 0).map((w) => (
-                <option key={w.subAdminId} value={w.subAdminId}>
-                  {w.subAdminName} — {w.balance} coins available
-                </option>
-              ))}
-            </select>
-            {withdrawableWallet && (
-              <p className="text-xs text-slate-500">
-                Available: {withdrawableWallet.balance} coins
-                (locked in battles: {withdrawableWallet.lockedBattleBalance})
-              </p>
-            )}
-          </div>
+          {wdWallet && (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 space-y-1">
+              <p className="font-bold text-emerald-200">Withdrawing from: {wdWallet.subAdminName}</p>
+              <p>🏆 Available Winning Coins: <strong className="text-emerald-300">₹{(wdWallet.winningBalance || 0).toLocaleString()}</strong></p>
+              <p>🎮 Deposit Coins: ₹{(wdWallet.depositBalance || 0).toLocaleString()} (play only — not withdrawable)</p>
+              <p className="text-slate-400">Purchased coins are for gameplay; all match winnings go to your Winning Wallet and can be withdrawn anytime (Min ₹200).</p>
+            </div>
+          )}
 
           <Input
-            label="Amount (coins = ₹)"
+            label={`Amount (coins = ₹) — Max ₹${wdWallet?.winningBalance || 0}`}
             type="number"
             min={1}
+            max={wdWallet?.winningBalance || 0}
             value={wdForm.amountCoins}
             onChange={(e) => setWdForm({ ...wdForm, amountCoins: parseInt(e.target.value) || 0 })}
           />
@@ -342,34 +378,28 @@ export default function WalletPage() {
               {['upi', 'bank'].map((m) => (
                 <button key={m} onClick={() => setWdForm({ ...wdForm, payoutMethod: m })}
                   className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-all
-                    ${wdForm.payoutMethod === m
-                      ? 'bg-purple-500/20 border-purple-500/40 text-purple-300'
-                      : 'bg-white/5 border-white/10 text-slate-400'}`}>
+                    ${wdForm.payoutMethod === m ? 'bg-purple-500/20 border-purple-500/40 text-purple-300' : 'bg-white/5 border-white/10 text-slate-400'}`}>
                   {m === 'upi' ? 'UPI' : 'Bank Transfer'}
                 </button>
               ))}
             </div>
           </div>
 
-          {wdForm.payoutMethod === 'upi' ? (
-            <Input
-              label="Your UPI ID"
-              placeholder="yourname@bank"
+          {wdForm.payoutMethod === 'upi' && (
+            <Input label="Your UPI ID" placeholder="yourname@bank"
               value={wdForm.userUpiId}
-              onChange={(e) => setWdForm({ ...wdForm, userUpiId: e.target.value })}
-            />
-          ) : null}
+              onChange={(e) => setWdForm({ ...wdForm, userUpiId: e.target.value })} />
+          )}
 
-          <Input
-            label="Account holder name"
+          <Input label="Account holder name"
             value={wdForm.accountHolderName}
-            onChange={(e) => setWdForm({ ...wdForm, accountHolderName: e.target.value })}
-          />
+            onChange={(e) => setWdForm({ ...wdForm, accountHolderName: e.target.value })} />
 
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => setWdModal(false)}>Cancel</Button>
-            <Button loading={submitting} onClick={submitWithdrawal}>
-              <ArrowDownToLine size={16} /> Request ₹{wdForm.amountCoins || 0}
+            <Button loading={submitting} onClick={submitWithdrawal}
+              disabled={!wdWallet || (wdWallet.winningBalance || 0) < wdForm.amountCoins}>
+              <ArrowDownToLine size={16} /> Withdraw ₹{wdForm.amountCoins || 0}
             </Button>
           </div>
         </div>
