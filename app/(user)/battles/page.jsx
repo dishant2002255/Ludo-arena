@@ -505,6 +505,7 @@ function BattlesLobby() {
           </button>
         </div>
       </Modal>
+
     </div>
   );
 }
