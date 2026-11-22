@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Trophy, ShoppingCart, ArrowDownToLine, Gamepad2, ChevronRight } from 'lucide-react';
+import { Trophy, ShoppingCart, ArrowDownToLine, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
@@ -50,7 +50,7 @@ function SubWalletCard({ wallet, onWithdraw }) {
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="rounded-xl p-3 text-center" style={{ background: '#f0f4ff', border: '1px solid #c7d2fe' }}>
           <div className="flex items-center justify-center gap-1 mb-0.5">
-            <Gamepad2 size={11} style={{ color: '#4f46e5' }} />
+            <span style={{ color: '#4f46e5', fontSize: 13 }}>🎮</span>
             <p className="text-xs font-bold" style={{ color: '#4f46e5' }}>Deposit</p>
           </div>
           <p className="font-black text-lg" style={{ color: '#3730a3' }}>₹{(wallet.depositBalance||0).toLocaleString()}</p>
