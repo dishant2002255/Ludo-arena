@@ -2,10 +2,6 @@
 import { useState } from 'react';
 import { User } from 'lucide-react';
 import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Avatar from '@/components/ui/Avatar';
-import { StatCard } from '@/components/ui/Card';
-import { Trophy, Gamepad2, TrendingUp, Coins } from 'lucide-react';
 import api from '@/lib/api/axios';
 import useAuthStore from '@/store/authStore';
 import { toast } from '@/store/toastStore';
@@ -30,44 +26,68 @@ export default function ProfilePage() {
   const winRate = user?.totalMatches > 0
     ? Math.round((user.totalWins / user.totalMatches) * 100) : 0;
 
+  const stats = [
+    { label: 'Total Wins',   value: user?.totalWins || 0,                    icon: '🏆', color: '#0a7a3c', bg: '#e8f8f0' },
+    { label: 'Battles',      value: user?.totalMatches || 0,                  icon: '⚔️', color: '#5b21b6', bg: '#ede9fe' },
+    { label: 'Win Rate',     value: `${winRate}%`,                            icon: '📈', color: '#c9960a', bg: '#fff3c4' },
+    { label: 'Balance',      value: `₹${user?.walletBalance?.toLocaleString() || 0}`, icon: '💰', color: '#3b2800', bg: '#fdf6e3' },
+  ];
+
   return (
-    <div className="space-y-8 animate-fade-in max-w-2xl">
+    <div className="space-y-5 animate-fade-in pb-6">
+
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white font-display">Profile</h1>
-        <p className="text-slate-400 mt-1">Manage your account details</p>
+        <h1 className="font-black text-2xl" style={{ color: '#3b2800' }}>My Profile</h1>
+        <p className="text-sm" style={{ color: '#a09070' }}>Account details manage karein</p>
       </div>
 
-      <div className="game-card p-8">
-        <div className="flex items-center gap-6 mb-8">
-          <Avatar username={user?.username} size="2xl" />
-          <div>
-            <h2 className="text-xl font-bold text-white">{user?.username}</h2>
-            <p className="text-slate-400 text-sm">{user?.email}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="badge-purple">Player</span>
-              <span className="text-xs text-slate-500">Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2026'}</span>
-            </div>
-          </div>
+      {/* Avatar card */}
+      <div className="rounded-2xl p-5 flex items-center gap-4"
+        style={{ background: 'linear-gradient(135deg,#fff3c4,#fde68a)', border: '1.5px solid #e8c84a' }}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center font-black text-2xl shrink-0"
+          style={{ background: 'linear-gradient(135deg,#f5c842,#c9960a)', color: '#3b2800', boxShadow: '0 3px 10px rgba(201,150,10,0.3)' }}>
+          {user?.username?.charAt(0).toUpperCase() || 'U'}
         </div>
+        <div>
+          <p className="font-black text-lg" style={{ color: '#3b2800' }}>{user?.username}</p>
+          <p className="text-sm" style={{ color: '#7a5a00' }}>{user?.email}</p>
+          <p className="text-xs mt-1" style={{ color: '#a09070' }}>
+            Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}
+          </p>
+        </div>
+      </div>
 
-        <form onSubmit={handleSave} className="space-y-5">
-          <Input
-            label="Username"
-            value={form.username}
-            onChange={e => setForm({ ...form, username: e.target.value })}
-            icon={<User size={16} />}
-          />
+      {/* Edit form */}
+      <div className="rounded-2xl p-5 space-y-4"
+        style={{ background: '#fffdf5', border: '1.5px solid #e8d49a' }}>
+        <p className="font-black text-sm" style={{ color: '#3b2800' }}>Edit Profile</p>
+
+        <form onSubmit={handleSave} className="space-y-4">
+          <Input label="Username" value={form.username} icon={<User size={16} />}
+            onChange={e => setForm({ ...form, username: e.target.value })} />
           <Input label="Email" value={user?.email || ''} disabled hint="Email cannot be changed" />
-          <Button type="submit" loading={saving}>Save Changes</Button>
+
+          <button type="submit" disabled={saving}
+            className="w-full py-3 rounded-full font-black text-sm active:scale-95 transition-transform disabled:opacity-50"
+            style={{ background: 'linear-gradient(to bottom,#f5c842,#c9960a)', color: '#3b2800', boxShadow: '0 3px 10px rgba(201,150,10,0.3)' }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
         </form>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard title="Total Wins" value={user?.totalWins || 0} icon={<Trophy size={20} />} color="green" />
-        <StatCard title="Matches" value={user?.totalMatches || 0} icon={<Gamepad2 size={20} />} color="purple" />
-        <StatCard title="Win Rate" value={`${winRate}%`} icon={<TrendingUp size={20} />} color="blue" />
-        <StatCard title="Coins" value={user?.walletBalance?.toLocaleString() || 0} icon={<Coins size={20} />} color="yellow" />
+      <div className="grid grid-cols-2 gap-3">
+        {stats.map(({ label, value, icon, color, bg }) => (
+          <div key={label} className="rounded-2xl p-4"
+            style={{ background: bg, border: '1.5px solid #e8d49a' }}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">{icon}</span>
+              <p className="text-xs font-semibold" style={{ color: '#7a5a00' }}>{label}</p>
+            </div>
+            <p className="font-black text-xl" style={{ color }}>{value}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
