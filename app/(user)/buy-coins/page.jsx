@@ -22,6 +22,8 @@ export default function BuyCoinsPage() {
   const router = useRouter();
   const { user, refreshUser } = useAuthStore();
   const [settings, setSettings]   = useState(null);
+  const [subAdmins, setSubAdmins] = useState([]);   // active sub-admins with UPI
+  const [subAdminId, setSubAdminId] = useState('');
   const [loading, setLoading]     = useState(true);
   const [coins, setCoins]         = useState(200);
   const [step, setStep]           = useState(STEP.SELECT);
@@ -80,9 +82,13 @@ export default function BuyCoinsPage() {
 
   const fetchSettings = async () => {
     try {
-      const { data } = await api.get('/payment/settings');
-      setSettings(data.data);
-      setCoins(data.data.minimumPurchaseCoins || 200);
+      const [s, sa] = await Promise.all([
+        api.get('/payment/settings'),
+        api.get('/wallet/sub-admins'),
+      ]);
+      setSettings(s.data.data);
+      setSubAdmins((sa.data.data || []).filter((x) => x.upiEnabled && x.hasStock));
+      setCoins(s.data.data.minimumPurchaseCoins || 200);
     } catch {
       toast.error('Failed to load payment settings');
     } finally {
@@ -91,13 +97,21 @@ export default function BuyCoinsPage() {
   };
 
   const handleProceed = async () => {
+    if (!subAdminId) {
+      toast.error('Select a Sub-Admin first');
+      return;
+    }
     if (coins < (settings?.minimumPurchaseCoins || 200)) {
       toast.error(`Minimum is ₹${settings?.minimumPurchaseCoins || 200}`);
       return;
     }
     setInitiating(true);
     try {
-      const { data } = await api.post('/payment/initiate', { coinsRequested: coins, upiPlatform: 'other' });
+      const { data } = await api.post('/payment/initiate', {
+        subAdminId,
+        coinsRequested: coins,
+        upiPlatform: 'other',
+      });
       const d = data.data;
       setOrderData({
         orderId:       d.order._id,
@@ -110,12 +124,7 @@ export default function BuyCoinsPage() {
       });
       setStep(STEP.PAY);
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed';
-      if (msg.includes('PAYMENT_NOT_ACTIVE') || msg.includes('not currently available')) {
-        toast.error('Coin purchases are not active. Use Free Coin Request instead.');
-      } else {
-        toast.error(msg);
-      }
+      toast.error(err.response?.data?.message || 'Failed to initiate payment');
     } finally {
       setInitiating(false);
     }
@@ -204,7 +213,7 @@ export default function BuyCoinsPage() {
   );
 
   const amountRupees     = coins * (settings?.coinPriceRupees || 1);
-  const isPaymentActive  = settings?.upiEnabled && settings?.upiConfigured;
+  const isPaymentActive  = subAdmins.length > 0 && !!subAdminId;
 
   return (
     <div className="max-w-md mx-auto space-y-5 animate-fade-in py-4">
@@ -219,17 +228,32 @@ export default function BuyCoinsPage() {
               <p className="text-slate-400 mt-1">1 coin = ₹{settings?.coinPriceRupees || 1} · Pay via UPI QR code</p>
             </div>
 
-            {/* Not active */}
-            {!isPaymentActive && (
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                <AlertCircle size={18} className="text-amber-400 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-amber-300 font-semibold text-sm">Coin Purchases Not Active</p>
-                  <p className="text-amber-400/70 text-xs mt-1">Admin hasn't set up UPI yet.</p>
-                  <Link href="/wallet" className="text-xs text-amber-400 underline mt-1 inline-block">Request free coins →</Link>
+            {/* Sub-Admin selector */}
+            <div>
+              <p className="text-sm font-medium text-slate-300 mb-2">1 · Choose your Sub-Admin</p>
+              {subAdmins.length === 0 ? (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                  <AlertCircle size={18} className="text-amber-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-amber-300 font-semibold text-sm">No Sub-Admin accepting UPI payments right now</p>
+                    <p className="text-amber-400/70 text-xs mt-1">Please check back later or contact support.</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="grid gap-2">
+                  {subAdmins.map((sa) => (
+                    <button key={sa._id} onClick={() => setSubAdminId(sa._id)}
+                      className={`p-3 rounded-xl border text-left transition-all
+                        ${subAdminId === sa._id
+                          ? 'bg-purple-500/20 border-purple-500/40'
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>
+                      <p className="text-white font-semibold text-sm">{sa.displayName}</p>
+                      <p className="text-xs text-slate-400">UPI payments enabled{sa.commissionPercent != null ? ` · commission ${sa.commissionPercent}%` : ''}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Balance */}
             <div className="game-card p-4 flex items-center justify-between">
@@ -242,7 +266,7 @@ export default function BuyCoinsPage() {
 
             {/* Quick amounts */}
             <div>
-              <p className="text-sm font-medium text-slate-300 mb-2">Select amount</p>
+              <p className="text-sm font-medium text-slate-300 mb-2">2 · Select amount</p>
               <div className="grid grid-cols-5 gap-2">
                 {QUICK_AMOUNTS.map(a => (
                   <button key={a} onClick={() => setCoins(a)}
@@ -276,11 +300,11 @@ export default function BuyCoinsPage() {
             {/* How it works */}
             <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 space-y-1.5">
               <p className="font-semibold text-blue-200">How it works:</p>
-              <p>1. Click Proceed — you'll see a QR code and UPI ID</p>
-              <p>2. Open any UPI app (GPay, PhonePe, Paytm, etc.) and scan the QR code</p>
-              <p>3. Or manually enter the UPI ID and amount in your app</p>
-              <p>4. After paying, click <strong>"I Have Paid"</strong></p>
-              <p>5. Admin verifies and coins are added instantly</p>
+              <p>1. Pick a Sub-Admin and your amount, then click Proceed</p>
+              <p>2. You'll see the Sub-Admin's QR code and UPI ID</p>
+              <p>3. Pay from any UPI app (GPay, PhonePe, Paytm, etc.)</p>
+              <p>4. Upload the payment screenshot and click <strong>"I Have Paid"</strong></p>
+              <p>5. The Sub-Admin verifies and coins are added instantly</p>
             </div>
 
             <Button fullWidth loading={initiating}
@@ -471,7 +495,7 @@ export default function BuyCoinsPage() {
 
               <div>
                 <p className="text-white font-bold text-xl">Admin is Verifying Your Payment</p>
-                <p className="text-slate-400 text-sm mt-2">Please keep this page open. This usually takes a few minutes.</p>
+                <p className="text-slate-400 text-sm mt-2">Please keep this page open. The Sub-Admin usually verifies within a few minutes.</p>
               </div>
 
               <div className="flex justify-center gap-2">

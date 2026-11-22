@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, Gamepad2, DoorOpen, BarChart3,
-  FileText, Bell, LogOut, Shield, Menu, X, Wallet, Trophy, CreditCard, Settings
+  FileText, Bell, LogOut, Shield, Menu, X, Wallet, Trophy, CreditCard, Settings, UserCog
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/admin/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
   { href: '/admin/tournaments', label: 'Tournaments',  icon: Trophy },
   { href: '/admin/payments',    label: 'Payments',     icon: CreditCard },
+  { href: '/admin/sub-admins', label: 'Sub-Admins',    icon: UserCog },
   { href: '/admin/users',       label: 'Users',        icon: Users },
   { href: '/admin/matches',     label: 'Matches',      icon: Gamepad2 },
   { href: '/admin/rooms',       label: 'Rooms',        icon: DoorOpen },

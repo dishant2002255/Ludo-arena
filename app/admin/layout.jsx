@@ -19,12 +19,12 @@ export default function AdminLayout({ children }) {
       router.push('/login');
       return;
     }
-    if (user?.role !== 'admin') {
+    if (!['admin','main_admin'].includes(user?.role)) {
       router.push('/dashboard');
     }
   }, [hydrated, isAuthenticated, user?.role]);
 
-  if (!hydrated || !isAuthenticated || user?.role !== 'admin') {
+  if (!hydrated || !isAuthenticated || !['admin','main_admin'].includes(user?.role)) {
     return (
       <div className="min-h-screen bg-gaming-gradient flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
@@ -43,3 +43,4 @@ export default function AdminLayout({ children }) {
     </div>
   );
 }
+

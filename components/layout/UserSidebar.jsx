@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, Gamepad2, Wallet, Trophy, User, LogOut, Coins, Menu, X, BookOpen
+  LayoutDashboard, Gamepad2, Wallet, Trophy, User, LogOut, Coins, Menu, X, BookOpen, Swords, Shield
 } from 'lucide-react';
 import { useState } from 'react';
 import useAuthStore from '@/store/authStore';
@@ -12,6 +12,7 @@ import Avatar from '@/components/ui/Avatar';
 const navItems = [
   { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
   { href: '/tournaments',  label: 'Tournaments',  icon: Trophy },
+  { href: '/battles',      label: 'Open Battles', icon: Swords },
   { href: '/matches',      label: 'Classic Play', icon: Gamepad2 },
   { href: '/buy-coins',    label: 'Buy Coins',    icon: Coins },
   { href: '/wallet',       label: 'Wallet',       icon: Wallet },
@@ -75,6 +76,16 @@ export default function UserSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-1">
+        {user?.role === 'sub_admin' && (
+          <Link
+            href="/subadmin"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600/30 to-purple-600/20 text-white border border-indigo-500/30 font-medium"
+          >
+            <Shield size={20} className="text-indigo-400" />
+            <span>My Sub-Admin Panel</span>
+          </Link>
+        )}
         {navItems.map((item) => (
           <NavLink key={item.href} item={item} />
         ))}
